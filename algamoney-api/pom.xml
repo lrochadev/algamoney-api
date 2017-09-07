@@ -77,6 +77,12 @@
 		    <version>3.4</version>
 		</dependency>
 		
+		<!-- JPA META MODAL GENERATOR -->
+		<dependency>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-jpamodelgen</artifactId>
+		</dependency>
+		
 		<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
 		<!-- Só para tirar um erro do console e depois pode comentar pois a dependencia ja foi para a m2 -->
 		<!--
