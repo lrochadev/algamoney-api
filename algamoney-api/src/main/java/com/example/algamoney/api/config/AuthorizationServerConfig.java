@@ -17,7 +17,7 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
 	@Autowired
-	// Vai gerenciar/validar a autencicacao recuperando o usuario e senha.
+	// Vai gerenciar/validar a autenticacao recuperando o usuario e senha.
 	private AuthenticationManager authenticationManager;
 	
 	@Override
