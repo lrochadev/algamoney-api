@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,16 +48,17 @@ public class LancamentoResource {
 	@Autowired
 	private MessageSource messageSource;
 	
+	@Autowired
+	private ApplicationEventPublisher publisher; // Publicador de eventos de aplicação.
+	
 	@GetMapping
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public Page<Lancamento> pesquisar(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		return lancamentoRepository.filtrar(lancamentoFilter, pageable);
 	}
 
-	@Autowired
-	// Publicador de eventos de aplicação.
-	private ApplicationEventPublisher publisher;
-
 	@PostMapping
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
 	public ResponseEntity<Lancamento> criar(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
 		
 		Lancamento lancamentoSalvo = lancamentoService.save(lancamento);
@@ -67,6 +69,7 @@ public class LancamentoResource {
 	}
 
 	@GetMapping("/{codigo}")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public ResponseEntity<Lancamento> buscarPeloCodigo(@PathVariable Long codigo, HttpServletResponse response) {
 
 		Lancamento lancamentoBd = lancamentoRepository.findOne(codigo);
@@ -82,6 +85,13 @@ public class LancamentoResource {
 		return ResponseEntity.created(uri).body(lancamentoBd);
 	}
 	
+	@DeleteMapping("/{codigo}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PreAuthorize("hasAuthority('ROLE_REMOVER_LANCAMENTO') and #oauth2.hasScope('delete')") // TODO: Verificar o tipo DELETE como SCOPE
+	public void remover(@PathVariable Long codigo) {
+		lancamentoRepository.delete(codigo);
+	}
+	
 	@ExceptionHandler({PessoaInexistenteOuInativaException.class})
 	public ResponseEntity<Object> handlerPessoaInexistenteOuInativaException(PessoaInexistenteOuInativaException ex) {
 		String msgUsuario = messageSource.getMessage("pessoa.inexistente.ou.inativa", null, LocaleContextHolder.getLocale());
@@ -89,22 +99,4 @@ public class LancamentoResource {
 		List<Erro> erros = Arrays.asList(new Erro(msgUsuario, msgDesenvolvedor));
 		return ResponseEntity.badRequest().body(erros);
 	}
-	
-	@DeleteMapping("/{codigo}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable Long codigo) {
-		lancamentoRepository.delete(codigo);
-	}
-//	
-//	@PutMapping("/{codigo}")
-//	public ResponseEntity<Pessoa> atualizar(@PathVariable Long codigo, @Valid @RequestBody Pessoa pessoa) {
-//		Pessoa pessoaBd = pessoaService.atualizar(codigo, pessoa);
-//		return ResponseEntity.ok(pessoaBd);
-//	}
-//	
-//	@PutMapping("/{codigo}/ativo")
-//	@ResponseStatus(HttpStatus.NO_CONTENT)
-//	public void atualizarPropriedadeAtivo(@PathVariable Long codigo, @RequestBody Boolean ativo) {
-//		pessoaService.atualizarPropriedadeAtivo(codigo, ativo);
-//	}
 }

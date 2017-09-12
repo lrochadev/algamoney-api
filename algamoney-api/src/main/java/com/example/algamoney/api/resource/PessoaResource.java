@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,48 +37,47 @@ public class PessoaResource {
 	@Autowired
 	private PessoaService pessoaService;
 
+	@Autowired
+	private ApplicationEventPublisher publisher; // Publicador de eventos de aplicação.
+	
 	@GetMapping
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	public List<Pessoa> listar() {
 		return pessoaRepository.findAll();
 	}
 
-	@Autowired
-	// Publicador de eventos de aplicação.
-	private ApplicationEventPublisher publisher;
-
 	@PostMapping
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('write')")
 	public ResponseEntity<Pessoa> criar(@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
-
 		Pessoa pessoaSalva = pessoaRepository.save(pessoa);
-
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, pessoaSalva.getCodigo()));
-
 		return ResponseEntity.status(HttpStatus.CREATED).body(pessoaSalva);
 	}
 
 	@GetMapping("/{codigo}")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	public ResponseEntity<Pessoa> buscarPeloCodigo(@PathVariable Long codigo, HttpServletResponse response) {
-
 		Pessoa pessoaBd = pessoaRepository.findOne(codigo);
-
+		
 		if (pessoaBd == null) {
 			return ResponseEntity.notFound().build();
 		}
 
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().build().toUri();
-
 		response.setHeader("Location", uri.toASCIIString());
-
+		
 		return ResponseEntity.created(uri).body(pessoaBd);
 	}
 	
 	@DeleteMapping("/{codigo}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PreAuthorize("hasAuthority('ROLE_REMOVER_PESSOA') and #oauth2.hasScope('delete')") // TODO: Verificar o tipo DELETE como SCOPE
 	public void remover(@PathVariable Long codigo) {
 		pessoaRepository.delete(codigo);
 	}
 	
 	@PutMapping("/{codigo}")
+//	@PreAuthorize("hasAuthority('') and #oauth2.hasScope('write')")
 	public ResponseEntity<Pessoa> atualizar(@PathVariable Long codigo, @Valid @RequestBody Pessoa pessoa) {
 		Pessoa pessoaBd = pessoaService.atualizar(codigo, pessoa);
 		return ResponseEntity.ok(pessoaBd);
@@ -85,6 +85,7 @@ public class PessoaResource {
 	
 	@PutMapping("/{codigo}/ativo")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+//	@PreAuthorize("hasAuthority('') and #oauth2.hasScope('write')")
 	public void atualizarPropriedadeAtivo(@PathVariable Long codigo, @RequestBody Boolean ativo) {
 		pessoaService.atualizarPropriedadeAtivo(codigo, ativo);
 	}
