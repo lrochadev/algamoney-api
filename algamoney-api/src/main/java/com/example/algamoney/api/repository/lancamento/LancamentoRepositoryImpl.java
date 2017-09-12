@@ -16,10 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
-import com.example.algamoney.api.model.Categoria_;
 import com.example.algamoney.api.model.Lancamento;
-import com.example.algamoney.api.model.Lancamento_;
-import com.example.algamoney.api.model.Pessoa_;
 import com.example.algamoney.api.repository.filter.LancamentoFilter;
 import com.example.algamoney.api.repository.projection.ResumoLancamento;
 
@@ -55,15 +52,15 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 		
 		// Classes geradas pelo JPA META MODEL GEN
 		if (!StringUtils.isEmpty(lancamentoFilter.getDescricao())) {
-			predicates.add(builder.like(builder.lower(root.get(Lancamento_.descricao)), "%" + lancamentoFilter.getDescricao().toLowerCase() + "%"));
+			predicates.add(builder.like(builder.lower(root.get(Lancamento.DESCRICAO)), "%" + lancamentoFilter.getDescricao().toLowerCase() + "%"));
 		}
 		
 		if (lancamentoFilter.getDataVencimentoDe() != null) {
-			predicates.add(builder.greaterThanOrEqualTo(root.get(Lancamento_.dataVencimento), lancamentoFilter.getDataVencimentoDe()));
+			predicates.add(builder.greaterThanOrEqualTo(root.get(Lancamento.DATA_VENCIMENTO), lancamentoFilter.getDataVencimentoDe()));
 		}
 
 		if (lancamentoFilter.getDataVencimentoAte() != null) {
-			predicates.add(builder.lessThanOrEqualTo(root.get(Lancamento_.dataVencimento), lancamentoFilter.getDataVencimentoAte()));
+			predicates.add(builder.lessThanOrEqualTo(root.get(Lancamento.DATA_VENCIMENTO), lancamentoFilter.getDataVencimentoAte()));
 		}
 		
 		return predicates.toArray(new Predicate[predicates.size()]);
@@ -102,14 +99,14 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 		Root<Lancamento> root = criteria.from(Lancamento.class);
 		
 		criteria.select(builder.construct(ResumoLancamento.class,
-				root.get(Lancamento_.codigo),
-				root.get(Lancamento_.descricao),
-				root.get(Lancamento_.dataVencimento),
-				root.get(Lancamento_.dataPagamento),
-				root.get(Lancamento_.valor),
-				root.get(Lancamento_.tipo),
-				root.get(Lancamento_.categoria).get(Categoria_.nome),
-				root.get(Lancamento_.pessoa).get(Pessoa_.nome)));
+				root.get(Lancamento.CODIGO),
+				root.get(Lancamento.DESCRICAO),
+				root.get(Lancamento.DATA_VENCIMENTO),
+				root.get(Lancamento.DATA_PAGAMENTO),
+				root.get(Lancamento.VALOR),
+				root.get(Lancamento.TIPO),
+				root.get(Lancamento.NOME_CATOGIRA),
+				root.get(Lancamento.NOME_PESSOA)));
 		
 		Predicate[] predicates = criarRestricoes(lancamentoFilter, builder, root);
 		
