@@ -25,8 +25,8 @@ public class Lancamento {
 	public static final String DATA_PAGAMENTO = "dataPagamento";
 	public static final String VALOR = "valor";
 	public static final String TIPO = "tipo";
-	public static final String NOME_CATOGIRA = "nome";
-	public static final String NOME_PESSOA = "nome";
+	public static final String NOME_PESSOA = "pessoa";
+//	public static final String NOME_CATOGIRA = "nome";
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

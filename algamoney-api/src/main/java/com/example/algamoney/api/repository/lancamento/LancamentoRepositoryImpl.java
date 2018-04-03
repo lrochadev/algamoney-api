@@ -105,7 +105,6 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 				root.get(Lancamento.DATA_PAGAMENTO),
 				root.get(Lancamento.VALOR),
 				root.get(Lancamento.TIPO),
-				root.get(Lancamento.NOME_CATOGIRA),
 				root.get(Lancamento.NOME_PESSOA)));
 		
 		Predicate[] predicates = criarRestricoes(lancamentoFilter, builder, root);

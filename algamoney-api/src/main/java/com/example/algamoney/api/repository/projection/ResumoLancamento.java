@@ -3,6 +3,7 @@ package com.example.algamoney.api.repository.projection;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.example.algamoney.api.model.Pessoa;
 import com.example.algamoney.api.model.TipoLancamento;
 
 public class ResumoLancamento {
@@ -14,17 +15,19 @@ public class ResumoLancamento {
 	private BigDecimal valor;
 	private TipoLancamento tipo;
 	private String categoria;
-	private String pessoa;
+	private Pessoa pessoa;
 
 	public ResumoLancamento(Long codigo, String descricao, LocalDate dataVencimento, LocalDate dataPagamento,
-			BigDecimal valor, TipoLancamento tipo, String categoria, String pessoa) {
+			BigDecimal valor, TipoLancamento tipo, Pessoa pessoa
+//			, String categoria, String pessoa
+			) {
 		this.codigo = codigo;
 		this.descricao = descricao;
 		this.dataVencimento = dataVencimento;
 		this.dataPagamento = dataPagamento;
 		this.valor = valor;
 		this.tipo = tipo;
-		this.categoria = categoria;
+//		this.categoria = categoria;
 		this.pessoa = pessoa;
 	}
 
@@ -84,11 +87,11 @@ public class ResumoLancamento {
 		this.categoria = categoria;
 	}
 
-	public String getPessoa() {
+	public Pessoa getPessoa() {
 		return pessoa;
 	}
 
-	public void setPessoa(String pessoa) {
+	public void setPessoa(Pessoa pessoa) {
 		this.pessoa = pessoa;
 	}
 }
