@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -63,18 +64,7 @@ public class LancamentoResource {
 	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		return lancamentoRepository.resumir(lancamentoFilter, pageable);
 	}
-
-	@PostMapping
-	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
-	public ResponseEntity<Lancamento> criar(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
-		
-		Lancamento lancamentoSalvo = lancamentoService.save(lancamento);
-		
-		publisher.publishEvent(new RecursoCriadoEvent(this, response, lancamentoSalvo.getCodigo()));
-		
-		return ResponseEntity.status(HttpStatus.CREATED).body(lancamentoSalvo);
-	}
-
+	
 	@GetMapping("/{codigo}")
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public ResponseEntity<Lancamento> buscarPeloCodigo(@PathVariable Long codigo, HttpServletResponse response) {
@@ -91,6 +81,17 @@ public class LancamentoResource {
 
 		return ResponseEntity.created(uri).body(lancamentoBd);
 	}
+
+	@PostMapping
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
+	public ResponseEntity<Lancamento> criar(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
+		
+		Lancamento lancamentoSalvo = lancamentoService.salvar(lancamento);
+		
+		publisher.publishEvent(new RecursoCriadoEvent(this, response, lancamentoSalvo.getCodigo()));
+		
+		return ResponseEntity.status(HttpStatus.CREATED).body(lancamentoSalvo);
+	}
 	
 	@DeleteMapping("/{codigo}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
@@ -105,5 +106,16 @@ public class LancamentoResource {
 		String msgDesenvolvedor = ex.toString();
 		List<Erro> erros = Arrays.asList(new Erro(msgUsuario, msgDesenvolvedor));
 		return ResponseEntity.badRequest().body(erros);
+	}
+	
+	@PutMapping("/{codigo}")
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO')")
+	public ResponseEntity<Lancamento> atualizar(@PathVariable Long codigo, @Valid @RequestBody Lancamento lancamento) {
+		try {
+			Lancamento lancamentoSalvo = lancamentoService.atualizar(codigo, lancamento);
+			return ResponseEntity.ok(lancamentoSalvo);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.notFound().build();
+		}
 	}
 }
