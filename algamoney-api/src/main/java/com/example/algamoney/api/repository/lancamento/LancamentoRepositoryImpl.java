@@ -117,29 +117,4 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 		
 		return new PageImpl<>(query.getResultList(), pageable, total(lancamentoFilter));
 	}
-	
-	// Teste
-	/*
-	private List<Lancamento> filtrarJpql(LancamentoFilter lancamentoFilter) {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(" from Lancamento where ");
-		
-		if (!StringUtils.isEmpty(lancamentoFilter.getDescricao())) {
-			sb.append(Lancamento_.descricao.getName() + " like '%" + lancamentoFilter.getDescricao().toLowerCase() + "'");
-		}
-		
-		if (lancamentoFilter.getDataVencimentoDe() != null) {
-			sb.append(" and " + Lancamento_.dataVencimento + " = " + lancamentoFilter.getDataVencimentoDe());
-		}
-
-		if (lancamentoFilter.getDataVencimentoAte() != null) {
-			sb.append(" and " + Lancamento_.dataVencimento + " = " + lancamentoFilter.getDataVencimentoAte());
-		}
-		
-		TypedQuery<Lancamento> query = (TypedQuery<Lancamento>) entityManager.createQuery(sb.toString());
-		
-		return (List<Lancamento>) query.getResultList();
-	}
-	*/
 }

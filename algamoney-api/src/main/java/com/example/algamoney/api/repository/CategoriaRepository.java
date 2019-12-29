@@ -1,9 +1,10 @@
 package com.example.algamoney.api.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.example.algamoney.api.model.Categoria;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
+@Repository
+public interface CategoriaRepository extends CrudRepository<Categoria, Long> {
 
 }

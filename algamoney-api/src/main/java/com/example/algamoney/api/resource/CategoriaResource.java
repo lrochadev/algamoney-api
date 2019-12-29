@@ -2,6 +2,7 @@ package com.example.algamoney.api.resource;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -33,7 +34,7 @@ public class CategoriaResource {
 	@GetMapping
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA') and #oauth2.hasScope('read')")
 	public List<Categoria> listar() {
-		return categoriaRepository.findAll();
+		return (List<Categoria>) categoriaRepository.findAll();
 	}
 	
 	@Autowired
@@ -55,9 +56,9 @@ public class CategoriaResource {
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA') and #oauth2.hasScope('read')")
 	public ResponseEntity<Categoria> buscarPeloCodigo(@PathVariable Long codigo, HttpServletResponse response) {
 		
-		Categoria categoriaBd = categoriaRepository.findOne(codigo);
+		Optional<Categoria> categoriaBd = categoriaRepository.findById(codigo);
 		
-		if (categoriaBd == null) {
+		if (!categoriaBd.isPresent()) {
 			return ResponseEntity.notFound().build();
 		}
 		
@@ -65,6 +66,6 @@ public class CategoriaResource {
 
 		response.setHeader("Location", uri.toASCIIString());
 		
-		return ResponseEntity.created(uri).body(categoriaBd);
+		return ResponseEntity.created(uri).body(categoriaBd.get());
 	}
 }

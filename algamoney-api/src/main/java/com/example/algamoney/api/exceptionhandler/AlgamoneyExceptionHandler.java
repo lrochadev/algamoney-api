@@ -34,7 +34,7 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 		
 		String msgUsuario = messageSource.getMessage("mensagem.invalida", null, LocaleContextHolder.getLocale());
-		String msgDesenvolvedor = ex.getCause() != null ? ex.getCause().getMessage().toString() : ex.toString();
+		String msgDesenvolvedor = ex.getCause() != null ? ex.getCause().getMessage() : ex.toString();
 		List<Erro> erros = Arrays.asList(new Erro(msgUsuario, msgDesenvolvedor));
 		return handleExceptionInternal(ex, erros, headers, status, request);
 	}
@@ -50,7 +50,7 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler({ EmptyResultDataAccessException.class })
 	public ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex, WebRequest request) {
 		String msgUsuario = messageSource.getMessage("recurso.nao.encontrado", null, LocaleContextHolder.getLocale());
-		String msgDesenvolvedor = ex.getMessage().toString();
+		String msgDesenvolvedor = ex.getMessage();
 		List<Erro> erros = Arrays.asList(new Erro(msgUsuario, msgDesenvolvedor));
 		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
 	}

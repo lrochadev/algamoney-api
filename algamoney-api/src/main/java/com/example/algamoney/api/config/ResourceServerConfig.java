@@ -24,9 +24,13 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 @EnableGlobalMethodSecurity(prePostEnabled = true) // Habilito a segurança (roles/scope) nos metodos. 
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
+	private final UserDetailsService userDetailsService;
+
 	@Autowired
-	private UserDetailsService userDetailsService;
-	
+	public ResourceServerConfig(UserDetailsService userDetailsService) {
+		this.userDetailsService = userDetailsService;
+	}
+
 	@Autowired
 	public void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
@@ -40,7 +44,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
-		.antMatchers("/categorias").permitAll() //Comentado pois agora tem validação com roles
+		.antMatchers("/categorias").permitAll()
 		.anyRequest().authenticated()
 		.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 		.and().csrf().disable();
@@ -52,7 +56,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 	 * 
 	 */
 	@Override
-	public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+	public void configure(ResourceServerSecurityConfigurer resources) {
 		resources.stateless(true);
 	}
 

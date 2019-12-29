@@ -3,6 +3,7 @@ package com.example.algamoney.api.resource;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -41,18 +42,23 @@ import com.example.algamoney.api.service.exception.PessoaInexistenteOuInativaExc
 @RequestMapping("/lancamentos")
 public class LancamentoResource {
 
-	@Autowired
-	private LancamentoRepository lancamentoRepository;
+	private final LancamentoRepository lancamentoRepository;
 	
-	@Autowired
-	private LancamentoService lancamentoService;
+	private final LancamentoService lancamentoService;
 	
+	private final MessageSource messageSource;
+
+	// Publicador de eventos de aplicação.
+	private final ApplicationEventPublisher publisher;
+
 	@Autowired
-	private MessageSource messageSource;
-	
-	@Autowired
-	private ApplicationEventPublisher publisher; // Publicador de eventos de aplicação.
-	
+	public LancamentoResource(LancamentoRepository lancamentoRepository, LancamentoService lancamentoService, MessageSource messageSource, ApplicationEventPublisher publisher) {
+		this.lancamentoRepository = lancamentoRepository;
+		this.lancamentoService = lancamentoService;
+		this.messageSource = messageSource;
+		this.publisher = publisher;
+	}
+
 	@GetMapping
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public Page<Lancamento> pesquisar(LancamentoFilter lancamentoFilter, Pageable pageable) {
@@ -69,9 +75,9 @@ public class LancamentoResource {
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public ResponseEntity<Lancamento> buscarPeloCodigo(@PathVariable Long codigo, HttpServletResponse response) {
 
-		Lancamento lancamentoBd = lancamentoRepository.findOne(codigo);
+		Optional<Lancamento> lancamentoBd = lancamentoRepository.findById(codigo);
 
-		if (lancamentoBd == null) {
+		if (lancamentoBd.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
 
@@ -79,7 +85,7 @@ public class LancamentoResource {
 
 		response.setHeader("Location", uri.toASCIIString());
 
-		return ResponseEntity.created(uri).body(lancamentoBd);
+		return ResponseEntity.created(uri).body(lancamentoBd.get());
 	}
 
 	@PostMapping
@@ -95,9 +101,9 @@ public class LancamentoResource {
 	
 	@DeleteMapping("/{codigo}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@PreAuthorize("hasAuthority('ROLE_REMOVER_LANCAMENTO') and #oauth2.hasScope('delete')") // TODO: Verificar o tipo DELETE como SCOPE
+	@PreAuthorize("hasAuthority('ROLE_REMOVER_LANCAMENTO') and #oauth2.hasScope('delete')")
 	public void remover(@PathVariable Long codigo) {
-		lancamentoRepository.delete(codigo);
+		lancamentoRepository.deleteById(codigo);
 	}
 	
 	@ExceptionHandler({PessoaInexistenteOuInativaException.class})
@@ -112,8 +118,9 @@ public class LancamentoResource {
 	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO')")
 	public ResponseEntity<Lancamento> atualizar(@PathVariable Long codigo, @Valid @RequestBody Lancamento lancamento) {
 		try {
-			Lancamento lancamentoSalvo = lancamentoService.atualizar(codigo, lancamento);
-			return ResponseEntity.ok(lancamentoSalvo);
+
+			return ResponseEntity.ok(lancamentoService.atualizar(codigo, lancamento));
+
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.notFound().build();
 		}
